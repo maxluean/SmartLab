@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Lab & Management – หน้าหลัก</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Kanit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+        }
+        .nav-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <!-- Firebase Auth CDN -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-indigo-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM5.05 3.55a.75.75 0 00-1.06 1.06l1.06-1.06zM14.95 3.55a.75.75 0 011.06 1.06l-1.06-1.06zM2 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 012 10zM15.25 10a.75.75 0 000-1.5h1.5a.75.75 0 000 1.5h-1.5zM6.11 15.11a.75.75 0 01.75-.75h6.28a.75.75 0 010 1.5H6.86a.75.75 0 01-.75-.75zM3.55 5.05a.75.75 0 011.06-1.06l-1.06 1.06zM16.01 5.05a.75.75 0 00-1.06-1.06l1.06 1.06z" clip-rule="evenodd" />
+                    <path d="M4.88 9.07A5.25 5.25 0 0010 14.5a5.25 5.25 0 005.12-5.43 8.25 8.25 0 01-10.24 0z" />
+                </svg>
+                Smart Lab & Management
+            </div>
+            <!-- Auth Tabs -->
+            <nav class="flex items-center space-x-4">
+                <span id="user-email" class="text-indigo-700 font-medium"></span>
+                <a href="login.html" id="login-link" class="text-gray-600 hover:text-indigo-600 font-medium transition">เข้าสู่ระบบ</a>
+                <a href="#" id="logout-link" class="text-gray-600 hover:text-indigo-600 font-medium transition">ออกจากระบบ</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">ระบบจำลองและจัดการห้องปฏิบัติการอัจฉริยะ</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                ยินดีต้อนรับสู่ระบบ Smart Lab! แพลตฟอร์มที่ช่วยให้นักศึกษาและอาจารย์สามารถจองห้องปฏิบัติการ, ใช้งานเครื่องมือจำลองการทดลอง, และรับคำแนะนำจาก AI เพื่อเพิ่มประสิทธิภาพการเรียนรู้และการวิจัย
+            </p>
+        </div>
+
+        <!-- Navigation Grid -->
+        <div id="card-grid" class="flex justify-center mt-16">
+            <div id="card-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Card 1: Booking -->
+                <a href="booking.html" id="card-booking" class="nav-card bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center transition-transform duration-300 ease-in-out">
+                    <div class="bg-blue-100 text-blue-600 rounded-full p-4 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">จองห้องและอุปกรณ์</h3>
+                    <p class="text-gray-500">วางแผนและส่งคำขอจองห้องปฏิบัติการหรืออุปกรณ์ที่ต้องการใช้งานล่วงหน้า</p>
+                </a>
+
+                <!-- Card 2: Simulator -->
+                <a href="simulator.html" id="card-simulator" class="nav-card bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center transition-transform duration-300 ease-in-out">
+                    <div class="bg-yellow-100 text-yellow-600 rounded-full p-4 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">จำลองการทดลอง</h3>
+                    <p class="text-gray-500">ทดลองในสภาพแวดล้อมเสมือนจริงที่ปลอดภัยและควบคุมได้ เพื่อทำความเข้าใจหลักการต่างๆ</p>
+                </a>
+
+                <!-- Card 3: AI Helper -->
+                <a href="ai-lab-helper.html" id="card-ai" class="nav-card bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center transition-transform duration-300 ease-in-out">
+                    <div class="bg-purple-100 text-purple-600 rounded-full p-4 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">AI ผู้ช่วย</h3>
+                    <p class="text-gray-500">รับคำแนะนำในการออกแบบการทดลอง, รายการอุปกรณ์, และข้อควรระวังจากผู้ช่วย AI</p>
+                </a>
+
+                <!-- Card 4: Admin Dashboard -->
+                <a href="admin-dashboard.html" id="card-admin" class="nav-card bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center transition-transform duration-300 ease-in-out">
+                    <div class="bg-red-100 text-red-600 rounded-full p-4 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">แดชบอร์ดผู้ดูแล</h3>
+                    <p class="text-gray-500">จัดการคำขอ, สต็อกอุปกรณ์และสารเคมี (สำหรับเจ้าหน้าที่และอาจารย์)</p>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white mt-12">
+        <div class="container mx-auto px-6 py-4 text-center text-gray-500">
+            <p>&copy; 2025 Smart Lab & Management. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase config (ใช้ config ของโปรเจกต์คุณ)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCccYvtT_EX5wRLmQHb1DpcUgzT7jnUQu4",
+            authDomain: "smart-lab-8252d.firebaseapp.com",
+            projectId: "smart-lab-8252d",
+            databaseURL: "https://smart-lab-8252d-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Show user email if logged in and show/hide cards by role
+        firebase.auth().onAuthStateChanged(async function(user) {
+            const emailSpan = document.getElementById('user-email');
+            const loginLink = document.getElementById('login-link');
+            const logoutLink = document.getElementById('logout-link');
+            const cardBooking = document.getElementById('card-booking');
+            const cardSimulator = document.getElementById('card-simulator');
+            const cardAI = document.getElementById('card-ai');
+            const cardAdmin = document.getElementById('card-admin');
+            const cardList = document.getElementById('card-list');
+
+            function hideAllCards() {
+                cardBooking.style.display = 'none';
+                cardSimulator.style.display = 'none';
+                cardAI.style.display = 'none';
+                cardAdmin.style.display = 'none';
+            }
+
+            if (user && user.email) {
+                emailSpan.textContent = user.email;
+                loginLink.style.display = 'none';
+                logoutLink.style.display = '';
+
+                // ดึง role จาก Firebase Database
+                try {
+                    const db = firebase.database();
+                    const snapshot = await db.ref('users/' + user.uid).once('value');
+                    const userData = snapshot.val();
+                    const role = userData && userData.role ? userData.role : 'student';
+
+                    if (role === 'teacher') {
+                        // แสดงเฉพาะ card admin dashboard และจัดให้อยู่ตรงกลาง
+                        hideAllCards();
+                        cardAdmin.style.display = '';
+                        cardList.className = "flex justify-center";
+                        // ถ้าไม่ได้อยู่หน้า admin-dashboard.html ให้ redirect ไป
+                        if (!window.location.pathname.endsWith("admin-dashboard.html")) {
+                            window.location.href = "admin-dashboard.html";
+                        }
+                    } else {
+                        // แสดงทุก card ยกเว้น admin dashboard และจัดให้อยู่ตรงกลาง
+                        cardBooking.style.display = '';
+                        cardSimulator.style.display = '';
+                        cardAI.style.display = '';
+                        cardAdmin.style.display = 'none';
+                        cardList.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8";
+                    }
+                } catch (e) {
+                    // ถ้า error ให้แสดงทุก card ยกเว้น admin dashboard
+                    cardBooking.style.display = '';
+                    cardSimulator.style.display = '';
+                    cardAI.style.display = '';
+                    cardAdmin.style.display = 'none';
+                    cardList.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8";
+                }
+            } else {
+                emailSpan.textContent = '';
+                loginLink.style.display = '';
+                logoutLink.style.display = 'none';
+                // ผู้ไม่ได้ login เห็นทุก card ยกเว้น admin dashboard
+                cardBooking.style.display = '';
+                cardSimulator.style.display = '';
+                cardAI.style.display = '';
+                cardAdmin.style.display = 'none';
+                cardList.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8";
+            }
+        });
+
+        // Logout handler
+        document.getElementById('logout-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            firebase.auth().signOut().then(function() {
+                window.location.href = "login.html";
+            });
+        });
+    </script>
+</body>
+</html>
