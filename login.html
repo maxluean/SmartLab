@@ -1,0 +1,131 @@
+<!-- login.html -->
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>เข้าสู่ระบบ - Smart Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Kanit", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+      <h1 class="text-2xl font-bold text-center text-indigo-600 mb-6">
+        เข้าสู่ระบบ Smart Lab
+      </h1>
+      <form id="login-form" class="space-y-4">
+        <input
+          type="email"
+          id="email"
+          placeholder="อีเมล"
+          required
+          class="w-full px-4 py-2 border rounded"
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="รหัสผ่าน"
+          required
+          class="w-full px-4 py-2 border rounded"
+        />
+        <button
+          type="submit"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded font-semibold"
+        >
+          เข้าสู่ระบบ
+        </button>
+      </form>
+      <p class="mt-4 text-sm text-center text-gray-600">
+        ยังไม่มีบัญชี?
+        <a href="register.html" class="text-indigo-500 hover:underline"
+          >ลงทะเบียน</a
+        >
+      </p>
+      <div
+        id="error-message"
+        class="text-red-600 mt-4 text-sm text-center hidden"
+      ></div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+      import {
+        getDatabase,
+        ref,
+        get,
+      } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCccYvtT_EX5wRLmQHb1DpcUgzT7jnUQu4",
+        authDomain: "smartlab-f462e.firebaseapp.com",
+        databaseURL:
+          "https://smartlab-f462e-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "smartlab-f462e",
+        storageBucket: "smartlab-f462e.appspot.com",
+        messagingSenderId: "940970654088",
+        appId: "1:940970654088:web:0676adabcc2e5ce186a23d",
+        measurementId: "G-4X0EJJRER8",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getDatabase(app);
+
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const emailInput = document.getElementById("email");
+          const passwordInput = document.getElementById("password");
+          const errorMessage = document.getElementById("error-message");
+
+          const email = emailInput.value.trim();
+          const password = passwordInput.value.trim();
+          errorMessage.classList.add("hidden");
+
+          try {
+            const userCredential = await signInWithEmailAndPassword(
+              auth,
+              email,
+              password
+            );
+            const uid = userCredential.user.uid;
+
+            // อ่านข้อมูล role จาก Realtime Database
+            const userRef = ref(db, `users/${uid}`);
+            const snapshot = await get(userRef);
+
+            if (snapshot.exists()) {
+              const userData = snapshot.val();
+              const role = userData.role;
+
+              if (role === "teacher") {
+                window.location.href = "admin-dashboard.html";
+              } else {
+                window.location.href = "index.html";
+              }
+            } else {
+              throw new Error("ไม่พบข้อมูลผู้ใช้ในฐานข้อมูล");
+            }
+          } catch (error) {
+            console.error("Login error:", error);
+            errorMessage.textContent = "เข้าสู่ระบบล้มเหลว: " + error.message;
+            errorMessage.classList.remove("hidden");
+          }
+        });
+    </script>
+  </body>
+</html>
