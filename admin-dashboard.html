@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>แดชบอร์ดผู้ดูแล - Smart Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Kanit", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <header class="bg-white shadow-sm">
+      <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <!-- เปลี่ยนจากลิงก์ไป index.html เป็น # และปิด pointer -->
+        <span class="text-2xl font-bold text-indigo-600 select-none cursor-default"
+          >Smart Lab - แดชบอร์ดผู้ดูแล</span>
+        <!-- Auth Tabs -->
+        <nav class="flex items-center space-x-4">
+          <span id="user-email" class="text-indigo-700 font-medium"></span>
+          <a href="login.html" id="login-link" class="text-gray-600 hover:text-indigo-600 font-medium transition">เข้าสู่ระบบ</a>
+          <a href="#" id="logout-link" class="text-gray-600 hover:text-indigo-600 font-medium transition">ออกจากระบบ</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+      <!-- Booking Requests -->
+      <section id="booking-requests" class="mb-12">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6">
+          รายการคำขอจองล่าสุด
+        </h2>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500">
+              <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3">ผู้ขอ</th>
+                  <th class="px-6 py-3">วันที่/เวลา</th>
+                  <th class="px-6 py-3">อุปกรณ์</th>
+                  <th class="px-6 py-3">สถานะ</th>
+                  <th class="px-6 py-3 text-center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="booking-table-body">
+                <tr>
+                  <td colspan="5" class="text-center p-8 text-gray-500">
+                    กำลังโหลดข้อมูลคำขอ...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Equipment & Chemicals Management -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Equipment Management -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+          <h3 class="text-xl font-semibold text-gray-700 mb-4">
+            จัดการอุปกรณ์
+          </h3>
+          <form id="equipment-form" class="space-y-4 mb-4">
+            <input
+              type="text"
+              id="equipment-name"
+              placeholder="ชื่ออุปกรณ์"
+              required
+              class="w-full px-4 py-2 border rounded"
+            />
+            <input
+              type="number"
+              id="equipment-qty"
+              placeholder="จำนวน"
+              required
+              class="w-full px-4 py-2 border rounded"
+            />
+            <select
+              id="equipment-status"
+              class="w-full px-4 py-2 border rounded"
+            >
+              <option value="available">พร้อมใช้งาน</option>
+              <option value="maintenance">ซ่อมบำรุง</option>
+              <option value="unavailable">ไม่พร้อมใช้งาน</option>
+            </select>
+            <button
+              type="submit"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              เพิ่มอุปกรณ์
+            </button>
+          </form>
+          <ul id="equipment-list" class="space-y-2 text-sm"></ul>
+        </div>
+
+        <!-- Chemical Management -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+          <h3 class="text-xl font-semibold text-gray-700 mb-4">
+            จัดการสารเคมี
+          </h3>
+          <form id="chemical-form" class="space-y-4 mb-4">
+            <input
+              type="text"
+              id="chemical-name"
+              placeholder="ชื่อสารเคมี"
+              required
+              class="w-full px-4 py-2 border rounded"
+            />
+            <input
+              type="number"
+              id="chemical-qty"
+              placeholder="ปริมาณคงเหลือ"
+              required
+              class="w-full px-4 py-2 border rounded"
+            />
+            <input
+              type="number"
+              id="chemical-threshold"
+              placeholder="จุดสั่งซื้อ"
+              required
+              class="w-full px-4 py-2 border rounded"
+            />
+            <button
+              type="submit"
+              class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+            >
+              เพิ่ม/อัปเดตสารเคมี
+            </button>
+          </form>
+          <ul id="chemical-list" class="space-y-2 text-sm"></ul>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        onValue,
+        update,
+        set,
+        push,
+      } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCccYvtT_EX5wRLmQHb1DpcUgzT7jnUQu4",
+        authDomain: "smartlab-f462e.firebaseapp.com",
+        databaseURL:
+          "https://smartlab-f462e-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "smartlab-f462e",
+        storageBucket: "smartlab-f462e.appspot.com",
+        messagingSenderId: "940970654088",
+        appId: "1:940970654088:web:0676adabcc2e5ce186a23d",
+        measurementId: "G-4X0EJJRER8",
+      };
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+      import { get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+      const auth = getAuth(app);
+
+      // Auth tab logic
+      function updateAuthTabs(user) {
+        const emailSpan = document.getElementById('user-email');
+        const loginLink = document.getElementById('login-link');
+        const logoutLink = document.getElementById('logout-link');
+        if (user && user.email) {
+          emailSpan.textContent = user.email;
+          loginLink.style.display = 'none';
+          logoutLink.style.display = '';
+        } else {
+          emailSpan.textContent = '';
+          loginLink.style.display = '';
+          logoutLink.style.display = 'none';
+        }
+      }
+
+      // ตรวจสอบสถานะผู้ใช้
+      onAuthStateChanged(auth, async (user) => {
+        updateAuthTabs(user);
+        if (!user) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        const uid = user.uid;
+        const userRef = ref(db, `users/${uid}`);
+        const snapshot = await get(userRef);
+
+        // ถ้าไม่ใช่ครู redirect ออก
+        if (!snapshot.exists() || snapshot.val().role !== "teacher") {
+          alert("คุณไม่มีสิทธิ์เข้าถึงหน้านี้");
+          window.location.href = "index.html";
+        } else {
+          // ถ้าเป็นครู ให้ป้องกันการออกจากแดชบอร์ด
+          // ป้องกันการออกจากหน้านี้ (เช่น กด back หรือเปลี่ยน url)
+          history.pushState(null, "", window.location.href);
+          window.addEventListener("popstate", function (event) {
+            history.pushState(null, "", window.location.href);
+          });
+
+          // ป้องกันการคลิก link ไปหน้าอื่น (ยกเว้น logout)
+          document.querySelectorAll("a[href]").forEach(a => {
+            if (
+              !a.id ||
+              (a.id !== "logout-link" && a.id !== "login-link")
+            ) {
+              a.addEventListener("click", function (e) {
+                e.preventDefault();
+              });
+            }
+          });
+        }
+      });
+
+      // Logout handler
+      document.getElementById('logout-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        signOut(auth).then(() => {
+          window.location.href = "login.html";
+        });
+      });
+
+      // Booking
+      const bookingRef = ref(db, "bookings");
+      const bookingTableBody = document.getElementById("booking-table-body");
+
+      onValue(bookingRef, (snapshot) => {
+        bookingTableBody.innerHTML = "";
+
+        if (!snapshot.exists()) {
+          bookingTableBody.innerHTML =
+            '<tr><td colspan="5" class="text-center p-8 text-gray-500">ยังไม่มีคำขอจอง</td></tr>';
+          return;
+        }
+
+        const data = snapshot.val();
+        Object.entries(data).forEach(([id, booking]) => {
+          const row = document.createElement("tr");
+          row.className = "bg-white border-b hover:bg-gray-50";
+
+          const statusClasses = {
+            pending: "bg-yellow-100 text-yellow-800",
+            approved: "bg-green-100 text-green-800",
+            rejected: "bg-red-100 text-red-800",
+          };
+          const statusText = {
+            pending: "รออนุมัติ",
+            approved: "อนุมัติแล้ว",
+            rejected: "ไม่อนุมัติ",
+          };
+
+          row.innerHTML = `
+      <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+        ${booking.name || "-"}<br>
+        <span class="font-normal text-gray-500">${booking.subject || "-"}</span>
+      </td>
+      <td class="px-6 py-4">${booking.date || "-"} (${booking.time || "-"})</td>
+      <td class="px-6 py-4">${(booking.equipment || []).join(", ")}</td>
+      <td class="px-6 py-4">
+        <span class="px-2 py-1 text-xs font-medium rounded-full ${
+          statusClasses[booking.status] || ""
+        }">
+          ${statusText[booking.status] || booking.status}
+        </span>
+      </td>
+      <td class="px-6 py-4 text-center">
+        ${
+          booking.status === "pending"
+            ? `
+          <button data-id="${id}" class="approve-btn font-medium text-green-600 hover:underline px-2">อนุมัติ</button>
+          <button data-id="${id}" class="reject-btn font-medium text-red-600 hover:underline px-2">ปฏิเสธ</button>
+        `
+            : `
+          <button data-id="${id}" class="reset-btn font-medium text-gray-500 hover:underline px-2">รีเซ็ต</button>
+        `
+        }
+      </td>
+    `;
+
+          bookingTableBody.appendChild(row);
+        });
+      });
+
+      // Equipment
+      document
+        .getElementById("equipment-form")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name = document.getElementById("equipment-name").value;
+          const quantity = document.getElementById("equipment-qty").value;
+          const status = document.getElementById("equipment-status").value;
+          push(ref(db, "equipments"), { name, quantity, status });
+          e.target.reset();
+        });
+      onValue(ref(db, "equipments"), (snapshot) => {
+        const list = document.getElementById("equipment-list");
+        list.innerHTML = "";
+        snapshot.forEach((child) => {
+          const val = child.val();
+          list.innerHTML += `<li class="bg-gray-100 p-2 rounded">${val.name} (${val.quantity}) - ${val.status}</li>`;
+        });
+      });
+
+      // Chemicals
+      document
+        .getElementById("chemical-form")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name = document.getElementById("chemical-name").value;
+          const quantity = document.getElementById("chemical-qty").value;
+          const threshold = document.getElementById("chemical-threshold").value;
+          push(ref(db, "chemicals"), { name, quantity, threshold });
+          e.target.reset();
+        });
+      onValue(ref(db, "chemicals"), (snapshot) => {
+        const list = document.getElementById("chemical-list");
+        list.innerHTML = "";
+        snapshot.forEach((child) => {
+          const val = child.val();
+          const warning =
+            val.quantity <= val.threshold
+              ? "<span class='text-red-600'>(ต้องสั่งซื้อ)</span>"
+              : "";
+          list.innerHTML += `<li class="bg-gray-100 p-2 rounded">${val.name} (${val.quantity}) ${warning}</li>`;
+        });
+      });
+      // อัปเดตสถานะคำขอจอง
+      async function updateBookingStatus(id, newStatus) {
+        try {
+          await update(ref(db, `bookings/${id}`), { status: newStatus });
+        } catch (error) {
+          console.error("Error updating booking status:", error);
+          alert("เกิดข้อผิดพลาดในการอัปเดตสถานะ");
+        }
+      }
+
+      bookingTableBody.addEventListener("click", (e) => {
+        const target = e.target;
+        const bookingId = target.dataset.id;
+        if (!bookingId) return;
+
+        if (target.classList.contains("approve-btn")) {
+          if (confirm("คุณต้องการอนุมัติคำขอนี้ใช่หรือไม่?")) {
+            updateBookingStatus(bookingId, "approved");
+          }
+        } else if (target.classList.contains("reject-btn")) {
+          if (confirm("คุณต้องการปฏิเสธคำขอนี้ใช่หรือไม่?")) {
+            updateBookingStatus(bookingId, "rejected");
+          }
+        } else if (target.classList.contains("reset-btn")) {
+          if (
+            confirm('คุณต้องการรีเซ็ตสถานะคำขอนี้เป็น "รออนุมัติ" ใช่หรือไม่?')
+          ) {
+            updateBookingStatus(bookingId, "pending");
+          }
+        }
+      });
+      document
+        .getElementById("logout-btn")
+        ?.addEventListener("click", async () => {
+          await signOut(auth);
+          window.location.href = "login.html";
+        });
+    </script>
+  </body>
+</html>
