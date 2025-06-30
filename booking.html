@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>จองห้องแล็บและอุปกรณ์ - Smart Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-indigo-600">Smart Lab & Management</a>
+            <a href="index.html" class="text-indigo-600 hover:text-indigo-800">&larr; กลับหน้าหลัก</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">แบบฟอร์มขอใช้บริการห้องปฏิบัติการ</h1>
+            <p class="text-gray-500 mb-8">กรุณากรอกข้อมูลให้ครบถ้วนเพื่อส่งคำขอจองห้องและอุปกรณ์</p>
+
+            <!-- ตารางการจอง -->
+            <div class="mb-10">
+                <h2 class="text-xl font-bold text-indigo-700 mb-2">ตารางการจอง</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                        <thead>
+                            <tr>
+                                <th class="px-3 py-2 border-b text-left">ชื่อผู้จอง</th>
+                                <th class="px-3 py-2 border-b text-left">วิชา/โครงการ</th>
+                                <th class="px-3 py-2 border-b text-left">วันที่</th>
+                                <th class="px-3 py-2 border-b text-left">ช่วงเวลา</th>
+                                <th class="px-3 py-2 border-b text-left">อุปกรณ์</th>
+                                <th class="px-3 py-2 border-b text-left">สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="booking-table-body">
+                            <tr>
+                                <td colspan="6" class="text-center text-gray-400 py-4">กำลังโหลดข้อมูล...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <form id="booking-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-สกุล ผู้ขอเบิก</label>
+                        <input type="text" id="name" name="name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="เช่น นายสมชาย ใจดี" />
+                    </div>
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">วิชา/โครงการ</label>
+                        <select id="subject" name="subject" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">-- เลือกวิชา/โครงการ --</option>
+                            <option value="แล็ปฟิสิกส์">แล็ปฟิสิกส์</option>
+                            <option value="แล็ปเคมี">แล็ปเคมี</option>
+                            <option value="แล็ปชีวะ">แล็ปชีวะ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">วันที่ต้องการใช้งาน</label>
+                        <input type="date" id="date" name="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg" />
+                    </div>
+                    <div>
+                        <label for="time" class="block text-sm font-medium text-gray-700 mb-1">ช่วงเวลา</label>
+                        <select id="time" name="time" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                            <option value="">-- เลือกช่วงเวลา --</option>
+                            <option value="09:00-12:00">09:00 - 12:00</option>
+                            <option value="13:00-16:00">13:00 - 16:00</option>
+                            <option value="16:00-19:00">16:00 - 19:00</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">อุปกรณ์ที่ต้องการ (เลือกได้หลายรายการ)</label>
+                    <div id="equipment-list" class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2 p-4 border border-gray-200 rounded-lg max-h-60 overflow-y-auto">
+                        <p class="text-gray-500">กำลังโหลดรายการอุปกรณ์...</p>
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <button type="submit" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700">ส่งคำขอจอง</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-white mt-12">
+        <div class="container mx-auto px-6 py-4 text-center text-gray-500">
+            <p>&copy; 2025 Smart Lab &amp; Management. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK & Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+        import { getDatabase, ref, child, get, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCccYvtT_EX5wRLmQHb1DpcUgzT7jnUQu4",
+            authDomain: "smart-lab-8252d.firebaseapp.com",
+            databaseURL: "https://smartlab-f462e-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "smart-lab-8252d",
+            storageBucket: "smart-lab-8252d.appspot.com",
+            messagingSenderId: "467083368769",
+            appId: "1:467083368769:web:29b2e512d15f06161ae9c0",
+            measurementId: "G-WFYR6K03J3"
+        };
+
+        // Init Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase(app);
+
+        // DOM elements
+        const equipmentListDiv = document.getElementById('equipment-list');
+        const bookingForm = document.getElementById('booking-form');
+        const bookingTableBody = document.getElementById('booking-table-body');
+
+        /* --------------------------------- */
+        /* ดึงรายการอุปกรณ์แบบ real‑time จาก Firebase */
+        /* --------------------------------- */
+        async function fetchEquipment() {
+            try {
+                const equipmentSnap = await get(child(ref(db), 'equipments'));
+
+                equipmentListDiv.innerHTML = '';
+
+                if (equipmentSnap.exists()) {
+                    const equipmentObj = equipmentSnap.val();
+
+                    Object.keys(equipmentObj).forEach(key => {
+                        const eq = equipmentObj[key];
+
+                        // แสดงเฉพาะอุปกรณ์ที่ available และมีจำนวนคงเหลือ
+                        if (eq.status === 'available' && eq.quantity > 0) {
+                            const checkboxDiv = document.createElement('div');
+                            checkboxDiv.classList.add('flex', 'items-center');
+                            checkboxDiv.innerHTML = `
+                                <input id="${key}" name="equipment" type="checkbox" value="${eq.name}" class="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+                                <label for="${key}" class="ml-3 block text-sm text-gray-700">${eq.name} (${eq.quantity} ชิ้น)</label>
+                            `;
+                            equipmentListDiv.appendChild(checkboxDiv);
+                        }
+                    });
+
+                    // กรณีไม่มีอุปกรณ์ที่พร้อมใช้เลย
+                    if (!equipmentListDiv.hasChildNodes()) {
+                        equipmentListDiv.innerHTML = '<p class="text-red-500">ขณะนี้ไม่มีอุปกรณ์ที่พร้อมให้บริการ</p>';
+                    }
+                } else {
+                    equipmentListDiv.innerHTML = '<p class="text-red-500">ไม่พบข้อมูลอุปกรณ์</p>';
+                }
+            } catch (error) {
+                console.error('Fetch equipment error:', error);
+                equipmentListDiv.innerHTML = '<p class="text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูลอุปกรณ์</p>';
+            }
+        }
+
+        // ดึงข้อมูลการจองทั้งหมดมาแสดงในตาราง
+        async function fetchBookings() {
+            try {
+                const bookingsSnap = await get(child(ref(db), 'bookings'));
+                bookingTableBody.innerHTML = '';
+                if (bookingsSnap.exists()) {
+                    const bookings = bookingsSnap.val();
+                    // เรียงลำดับตามวันที่ล่าสุด
+                    const sorted = Object.values(bookings).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    sorted.forEach(booking => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="px-3 py-2 border-b">${booking.name || '-'}</td>
+                            <td class="px-3 py-2 border-b">${booking.subject || '-'}</td>
+                            <td class="px-3 py-2 border-b">${booking.date || '-'}</td>
+                            <td class="px-3 py-2 border-b">${booking.time || '-'}</td>
+                            <td class="px-3 py-2 border-b">${(booking.equipment || []).join(', ')}</td>
+                            <td class="px-3 py-2 border-b">
+                                <span class="${
+                                    booking.status === 'approved'
+                                        ? 'text-green-600'
+                                        : booking.status === 'pending'
+                                        ? 'text-yellow-600'
+                                        : 'text-red-600'
+                                } font-semibold">
+                                ${
+                                    booking.status === 'approved'
+                                        ? 'อนุมัติ'
+                                        : booking.status === 'pending'
+                                        ? 'รออนุมัติ'
+                                        : 'ไม่อนุมัติ'
+                                }
+                                </span>
+                            </td>
+                        `;
+                        bookingTableBody.appendChild(tr);
+                    });
+                    if (!bookingTableBody.hasChildNodes()) {
+                        bookingTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-4">ไม่มีข้อมูลการจอง</td></tr>';
+                    }
+                } else {
+                    bookingTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-4">ไม่มีข้อมูลการจอง</td></tr>';
+                }
+            } catch (error) {
+                bookingTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+            }
+        }
+
+        // ตรวจสอบว่ามีการจองซ้ำหรือไม่ (ถ้าตรง subject, date, time และ status เป็น approved หรือ pending)
+        async function isDuplicateBooking(date, time, subject) {
+            try {
+                const bookingsSnap = await get(child(ref(db), 'bookings'));
+                if (bookingsSnap.exists()) {
+                    const bookings = bookingsSnap.val();
+                    for (const key in bookings) {
+                        const b = bookings[key];
+                        if (
+                            b.date === date &&
+                            b.time === time &&
+                            b.subject === subject &&
+                            (b.status === 'approved' || b.status === 'pending')
+                        ) {
+                            return true;
+                        }
+                    }
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        // ตรวจสอบอุปกรณ์ซ้ำ (เฉพาะที่ approved ในช่วง subject/date/time เดียวกัน)
+        async function isEquipmentClash(date, time, subject, selectedEquipment) {
+            try {
+                const bookingsSnap = await get(child(ref(db), 'bookings'));
+                if (bookingsSnap.exists()) {
+                    const bookings = bookingsSnap.val();
+                    for (const key in bookings) {
+                        const b = bookings[key];
+                        if (
+                            b.date === date &&
+                            b.time === time &&
+                            b.subject === subject &&
+                            b.status === 'approved' &&
+                            b.equipment &&
+                            b.equipment.some(eq => selectedEquipment.includes(eq))
+                        ) {
+                            return true;
+                        }
+                    }
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        async function handleBookingSubmit(event) {
+            event.preventDefault();
+
+            const formData = new FormData(bookingForm);
+            const selectedEquipment = Array.from(document.querySelectorAll('input[name="equipment"]:checked')).map(cb => cb.value);
+
+            const bookingData = {
+                name: formData.get('name'),
+                subject: formData.get('subject'),
+                date: formData.get('date'),
+                time: formData.get('time'),
+                equipment: selectedEquipment,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+
+            if (!bookingData.name || !bookingData.subject || !bookingData.date || !bookingData.time) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            // ตรวจสอบการจองซ้ำ (subject, date, time)
+            if (await isDuplicateBooking(bookingData.date, bookingData.time, bookingData.subject)) {
+                alert('มีการจองแล็ปนี้ในวันและเวลานี้แล้ว ไม่สามารถจองซ้ำได้');
+                return;
+            }
+
+            // ตรวจสอบอุปกรณ์ซ้ำ
+            if (await isEquipmentClash(bookingData.date, bookingData.time, bookingData.subject, bookingData.equipment)) {
+                alert('มีอุปกรณ์ที่เลือกถูกจองในวันและเวลานี้แล้ว');
+                return;
+            }
+
+            try {
+                const bookingRef = push(ref(db, 'bookings'));
+                await set(bookingRef, bookingData);
+                alert('ส่งคำขอสำเร็จ! รอการอนุมัติจากเจ้าหน้าที่');
+                bookingForm.reset();
+                fetchBookings(); // อัปเดตตาราง
+            } catch (error) {
+                console.error("Error: ", error);
+                alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').setAttribute('min', today);
+            fetchEquipment();
+            fetchBookings();
+        });
+
+        bookingForm.addEventListener('submit', handleBookingSubmit);
+    </script>
+</body>
+</html>

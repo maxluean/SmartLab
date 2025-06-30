@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI ผู้ช่วยออกแบบการทดลอง - Smart Lab</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Kanit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+        }
+        /* Custom animation for spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-indigo-600">
+                Smart Lab & Management
+            </a>
+            <!-- Auth Tabs -->
+            <nav class="flex items-center space-x-4">
+                <span id="user-email" class="text-indigo-700 font-medium"></span>
+                <a href="login.html" id="login-link" class="text-gray-600 hover:text-indigo-600 font-medium transition">เข้าสู่ระบบ</a>
+                <a href="#" id="logout-link" class="text-gray-600 hover:text-indigo-600 font-medium transition">ออกจากระบบ</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <div class="max-w-3xl mx-auto text-center">
+            <h1 class="text-3xl font-bold text-gray-800">AI ผู้ช่วยออกแบบการทดลอง</h1>
+            <p class="text-gray-600 mt-2 mb-8">
+                ป้อนหัวข้อการทดลองที่คุณสนใจ แล้ว AI จะช่วยร่างขั้นตอน, อุปกรณ์, และข้อควรระวังเบื้องต้นให้
+            </p>
+        </div>
+
+        <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input type="text" id="experiment-input" class="flex-grow w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="เช่น การหาค่า pH ของสารละลาย, การสกัด DNA จากกล้วย">
+                <button id="get-suggestion-btn" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300 flex items-center justify-center">
+                    <span id="btn-text">ขอคำแนะนำจาก AI</span>
+                    <div id="btn-spinner" class="spinner w-5 h-5 border-2 border-white border-t-transparent rounded-full hidden ml-2"></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="max-w-3xl mx-auto mt-8 bg-white p-8 rounded-xl shadow-lg hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 flex-1">
+                    ผลลัพธ์สำหรับ: "<span id="result-title" class="text-indigo-600"></span>"
+                </h2>
+                <button id="export-pdf-btn" class="ml-4 bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition hidden">
+                    ดาวน์โหลด PDF
+                </button>
+            </div>
+            <div class="space-y-6" id="pdf-export-content">
+                <!-- Section 1: Procedure -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                        วิธีทำเบื้องต้น
+                    </h3>
+                    <div id="procedure-content" class="text-gray-600 prose max-w-none"></div>
+                </div>
+
+                <!-- Section 2: Materials -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a1 1 0 000 2c5.051 0 9 4.949 9 11a1 1 0 102 0C16 7.373 11.627 3 5 3z" /><path d="M4 9a1 1 0 011-1 7 7 0 017 7 1 1 0 11-2 0 5 5 0 00-5-5 1 1 0 01-1-1zM3 15a2 2 0 114 0 2 2 0 01-4 0z" /></svg>
+                        วัสดุอุปกรณ์
+                    </h3>
+                    <div id="materials-content" class="text-gray-600 prose max-w-none"></div>
+                </div>
+
+                <!-- Section 3: Precautions -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        ข้อควรระวัง
+                    </h3>
+                    <div id="precautions-content" class="text-gray-600 prose max-w-none"></div>
+                </div>
+            </div>
+        </div>
+        
+         <!-- Placeholder for initial state or error -->
+        <div id="initial-placeholder" class="max-w-3xl mx-auto mt-8 text-center text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+            <p class="mt-4">ผลลัพธ์จาก AI จะแสดงที่นี่</p>
+        </div>
+
+    </main>
+
+    <script>
+        const experimentInput = document.getElementById('experiment-input');
+        const getSuggestionBtn = document.getElementById('get-suggestion-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        
+        const resultsSection = document.getElementById('results-section');
+        const resultTitle = document.getElementById('result-title');
+        const procedureContent = document.getElementById('procedure-content');
+        const materialsContent = document.getElementById('materials-content');
+        const precautionsContent = document.getElementById('precautions-content');
+        const initialPlaceholder = document.getElementById('initial-placeholder');
+
+        // --- Gemini API Call ---
+        async function getAiSuggestion(topic) {
+            // Set loading state
+            toggleLoading(true);
+            initialPlaceholder.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            
+            const prompt = `ในฐานะผู้ช่วยในห้องปฏิบัติการ (Lab Assistant) โปรดให้ข้อมูลสำหรับการทดลองหัวข้อ "${topic}" เป็นภาษาไทย โดยแบ่งออกเป็น 3 ส่วนชัดเจน คือ 1. วิธีทำเบื้องต้น (เป็นขั้นตอน 1, 2, 3), 2. วัสดุอุปกรณ์ (เป็น bullet list), และ 3. ข้อควรระวัง (เป็น bullet list) กรุณาใช้ markdown สำหรับการจัดรูปแบบ และใช้คำที่เข้าใจง่ายสำหรับนักศึกษา`;
+            
+            // This is where you would call the Gemini API
+            try {
+                // NOTE: This uses the Gemini API. An API key is required for models other than gemini-2.0-flash.
+                const apiKey = "AIzaSyB9VRNGj2ISOFL7IUMiUY0nLtLGKsMhqkw"; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [{ text: prompt }]
+                    }],
+                     generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "procedure": { "type": "ARRAY", "items": {"type": "STRING"} },
+                                "materials": { "type": "ARRAY", "items": {"type": "STRING"} },
+                                "precautions": { "type": "ARRAY", "items": {"type": "STRING"} },
+                            },
+                            required: ["procedure", "materials", "precautions"]
+                        }
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API call failed with status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                const text = result.candidates[0].content.parts[0].text;
+                const parsedJson = JSON.parse(text);
+                displayResults(topic, parsedJson);
+
+            } catch (error) {
+                console.error("Error calling AI API:", error);
+                displayError(`เกิดข้อผิดพลาด: ${error.message}. ขออภัย, ไม่สามารถเรียกข้อมูลจาก AI ได้ในขณะนี้`);
+            } finally {
+                // Reset loading state
+                toggleLoading(false);
+            }
+        }
+
+        function toggleLoading(isLoading) {
+             if (isLoading) {
+                btnText.classList.add('hidden');
+                btnSpinner.classList.remove('hidden');
+                getSuggestionBtn.disabled = true;
+                experimentInput.disabled = true;
+            } else {
+                btnText.classList.remove('hidden');
+                btnSpinner.classList.add('hidden');
+                getSuggestionBtn.disabled = false;
+                experimentInput.disabled = false;
+            }
+        }
+
+        function displayResults(topic, data) {
+            resultsSection.classList.remove('hidden');
+            initialPlaceholder.classList.add('hidden');
+            document.getElementById('export-pdf-btn').classList.remove('hidden');
+
+            resultTitle.textContent = topic;
+            
+            // Using a simple function to convert array to HTML list
+            const arrayToHtmlList = (arr, ordered = false) => {
+                const listTag = ordered ? 'ol' : 'ul';
+                const itemTag = 'li';
+                let html = `<${listTag} class="${ordered ? 'list-decimal' : 'list-disc'} list-inside space-y-1">`;
+                arr.forEach(item => {
+                    html += `<${itemTag}>${item}</${itemTag}>`;
+                });
+                html += `</${listTag}>`;
+                return html;
+            };
+
+            procedureContent.innerHTML = arrayToHtmlList(data.procedure, true);
+            materialsContent.innerHTML = arrayToHtmlList(data.materials);
+            precautionsContent.innerHTML = arrayToHtmlList(data.precautions);
+        }
+        
+        function displayError(message) {
+            initialPlaceholder.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            initialPlaceholder.innerHTML = `<p class="text-red-500">${message}</p>`;
+        }
+
+
+        // --- Event Listener ---
+        getSuggestionBtn.addEventListener('click', () => {
+            const topic = experimentInput.value.trim();
+            if (topic) {
+                getAiSuggestion(topic);
+            } else {
+                alert('กรุณาป้อนหัวข้อการทดลอง');
+            }
+        });
+
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script>
+        // Firebase config (ใช้ config ของโปรเจกต์คุณ)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCccYvtT_EX5wRLmQHb1DpcUgzT7jnUQu4",
+            authDomain: "smart-lab-8252d.firebaseapp.com",
+            projectId: "smart-lab-8252d",
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Show user email if logged in
+        firebase.auth().onAuthStateChanged(function(user) {
+            const emailSpan = document.getElementById('user-email');
+            const loginLink = document.getElementById('login-link');
+            const logoutLink = document.getElementById('logout-link');
+            if (user && user.email) {
+                emailSpan.textContent = user.email;
+                loginLink.style.display = 'none';
+                logoutLink.style.display = '';
+            } else {
+                emailSpan.textContent = '';
+                loginLink.style.display = '';
+                logoutLink.style.display = 'none';
+            }
+        });
+
+        // Logout handler
+        document.getElementById('logout-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            firebase.auth().signOut().then(function() {
+                window.location.href = "login.html";
+            });
+        });
+    </script>
+
+    <!-- เพิ่ม jsPDF และ html2canvas CDN ก่อนปิด </body> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    // PDF Export
+    document.getElementById('export-pdf-btn').addEventListener('click', async function() {
+        const pdfContent = document.getElementById('pdf-export-content');
+        const title = document.getElementById('result-title').textContent || 'AI Lab Suggestion';
+        // Use html2canvas to render the content as image
+        const canvas = await html2canvas(pdfContent, { scale: 2, backgroundColor: "#fff" });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new window.jspdf.jsPDF({
+            orientation: 'p',
+            unit: 'mm',
+            format: 'a4'
+        });
+        // Calculate width/height for A4
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgProps = pdf.getImageProperties(imgData);
+        let pdfWidth = pageWidth - 20;
+        let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        if (pdfHeight > pageHeight - 20) {
+            pdfHeight = pageHeight - 20;
+            pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
+        }
+        pdf.addImage(imgData, 'PNG', 10, 10, pdfWidth, pdfHeight);
+        pdf.save(`AI-Lab-Helper-${title}.pdf`);
+    });
+</script>
+</body>
+</html>
