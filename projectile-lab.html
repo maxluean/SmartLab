@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>จำลองการเคลื่อนที่โพรเจกไทล์ | Smart Lab V2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+        /* Custom styles for input range */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl sm:text-2xl font-bold text-indigo-600">Smart Lab & Management</h1>
+            <a href="simulator.html" class="text-sm sm:text-base text-indigo-600 hover:text-indigo-800 transition-colors">&larr; กลับหน้าหลัก</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 py-8 flex-grow">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Control Panel -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-lg h-fit">
+                <h2 class="text-xl font-bold text-indigo-700 mb-5">ตั้งค่าการทดลอง</h2>
+                
+                <!-- Angle Control -->
+                <div class="mb-5">
+                    <label for="angle-slider" class="block text-sm font-medium text-gray-700 flex justify-between">
+                        <span>มุมยิง (องศา)</span>
+                        <span id="angle-value" class="font-semibold text-indigo-600">45°</span>
+                    </label>
+                    <input type="range" id="angle-slider" min="0" max="90" value="45" step="1" class="mt-2">
+                </div>
+
+                <!-- Velocity Control -->
+                <div class="mb-6">
+                    <label for="velocity-slider" class="block text-sm font-medium text-gray-700 flex justify-between">
+                        <span>ความเร็วต้น (m/s)</span>
+                        <span id="velocity-value" class="font-semibold text-indigo-600">25 m/s</span>
+                    </label>
+                    <input type="range" id="velocity-slider" min="1" max="100" value="25" step="1" class="mt-2">
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col space-y-3">
+                    <button id="simulate-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-105">
+                        <i class="fas fa-play mr-2"></i>เริ่มจำลอง
+                    </button>
+                     <button id="reset-btn" class="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all">
+                        <i class="fas fa-redo mr-2"></i>รีเซ็ต
+                    </button>
+                </div>
+                
+                <!-- Options -->
+                <div class="mt-6 border-t pt-4">
+                     <div class="flex items-center">
+                        <input id="trace-mode" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="trace-mode" class="ml-2 block text-sm text-gray-900">โหมดวาดทับ (เปรียบเทียบ)</label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Simulation and Results -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Canvas Container -->
+                <div class="bg-white p-4 rounded-2xl shadow-lg">
+                    <canvas id="projectile-canvas"></canvas>
+                </div>
+                <!-- Results Display -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <h3 class="text-lg font-bold text-indigo-700 mb-4">ผลการคำนวณ</h3>
+                    <div id="results-display" class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+                        <div class="bg-indigo-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500">ระยะทาง (R)</p>
+                            <p id="range-result" class="text-xl font-bold text-indigo-800">- m</p>
+                        </div>
+                        <div class="bg-indigo-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500">ความสูงสูงสุด (H)</p>
+                            <p id="height-result" class="text-xl font-bold text-indigo-800">- m</p>
+                        </div>
+                        <div class="bg-indigo-50 p-4 rounded-lg col-span-2 sm:col-span-1">
+                            <p class="text-sm text-gray-500">เวลา (t)</p>
+                            <p id="time-result" class="text-xl font-bold text-indigo-800">- s</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- DOM Element Selection ---
+        const angleSlider = document.getElementById('angle-slider');
+        const velocitySlider = document.getElementById('velocity-slider');
+        const angleValue = document.getElementById('angle-value');
+        const velocityValue = document.getElementById('velocity-value');
+        const simulateBtn = document.getElementById('simulate-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const traceModeCheckbox = document.getElementById('trace-mode');
+        
+        const rangeResult = document.getElementById('range-result');
+        const heightResult = document.getElementById('height-result');
+        const timeResult = document.getElementById('time-result');
+
+        const canvas = document.getElementById('projectile-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- Simulation State ---
+        let angle = parseFloat(angleSlider.value);
+        let velocity = parseFloat(velocitySlider.value);
+        const g = 9.81; // Gravity
+        let animationId;
+        
+        // --- Initial Setup ---
+        function setupCanvas() {
+            const container = canvas.parentElement;
+            const size = Math.min(container.clientWidth, 600); // Set a max size for aesthetics
+            canvas.width = size;
+            canvas.height = size / 1.6; // Widescreen aspect ratio
+            drawInitialState();
+        }
+
+        function drawGrid(scaleX, scaleY, canvasWidth, canvasHeight, margin) {
+            ctx.strokeStyle = '#e2e8f0'; // Light gray for grid lines
+            ctx.lineWidth = 1;
+
+            // Vertical lines
+            for (let i = 1; i < 10; i++) {
+                const x = margin + i * (canvasWidth - 2 * margin) / 10;
+                ctx.beginPath();
+                ctx.moveTo(x, margin);
+                ctx.lineTo(x, canvasHeight - margin);
+                ctx.stroke();
+            }
+
+            // Horizontal lines
+            for (let i = 1; i < 5; i++) {
+                const y = margin + i * (canvasHeight - 2 * margin) / 5;
+                ctx.beginPath();
+                ctx.moveTo(margin, y);
+                ctx.lineTo(canvasWidth - margin, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawAxes(canvasWidth, canvasHeight, margin) {
+            ctx.strokeStyle = '#4a5568'; // Darker gray for axes
+            ctx.lineWidth = 2;
+
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(margin, margin);
+            ctx.lineTo(margin, canvasHeight - margin);
+            ctx.stroke();
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(margin, canvasHeight - margin);
+            ctx.lineTo(canvasWidth - margin, canvasHeight - margin);
+            ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '12px Kanit';
+            ctx.textAlign = 'center';
+            ctx.fillText('ระยะทาง (m)', canvasWidth / 2, canvasHeight - 5);
+            ctx.save();
+            ctx.translate(15, canvasHeight / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('ความสูง (m)', 0, 0);
+            ctx.restore();
+        }
+        
+        function drawInitialState() {
+            if (!traceModeCheckbox.checked) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            drawAxes(canvas.width, canvas.height, 30);
+        }
+
+        // --- Physics Calculations ---
+        function calculatePhysics(v, a) {
+            const angleRad = a * Math.PI / 180;
+            const t_flight = (2 * v * Math.sin(angleRad)) / g;
+            const range = v * Math.cos(angleRad) * t_flight;
+            const maxH = ((v * Math.sin(angleRad)) ** 2) / (2 * g);
+            return { t_flight, range, maxH, angleRad };
+        }
+
+        // --- Animation ---
+        function startSimulation() {
+            // Stop any previous animation
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+
+            // Get current values
+            angle = parseFloat(angleSlider.value);
+            velocity = parseFloat(velocitySlider.value);
+
+            // Calculate trajectory properties
+            const { t_flight, range, maxH, angleRad } = calculatePhysics(velocity, angle);
+
+            // Update result display
+            rangeResult.textContent = `${range.toFixed(2)} m`;
+            heightResult.textContent = `${maxH.toFixed(2)} m`;
+            timeResult.textContent = `${t_flight.toFixed(2)} s`;
+
+            // Prepare canvas for drawing
+            const margin = 30;
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            
+            if (!traceModeCheckbox.checked) {
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            }
+
+            // Determine scale. We need to find the max possible range and height to set a consistent scale
+            // or rescale every time. Let's rescale for simplicity.
+            // Edge case: for 90 degrees, range is 0. for 0 degrees, maxH is 0.
+            const displayRange = (range === 0) ? 1 : range;
+            const displayHeight = (maxH === 0) ? 1 : maxH;
+
+            const scaleX = (canvasWidth - 2 * margin) / displayRange;
+            const scaleY = (canvasHeight - 2 * margin) / displayHeight;
+            const scale = Math.min(scaleX, scaleY) * 0.9; // Use the smaller scale and add some padding
+
+            // Redraw background elements
+            drawGrid(scaleX, scaleY, canvasWidth, canvasHeight, margin);
+            drawAxes(canvasWidth, canvasHeight, margin);
+
+            // Animate
+            let startTime = null;
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const elapsedTime = (timestamp - startTime) / 1000; // in seconds
+
+                // Clear only the moving parts if we are not tracing everything again
+                if (traceModeCheckbox.checked === false) {
+                    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                    drawGrid(scaleX, scaleY, canvasWidth, canvasHeight, margin);
+                    drawAxes(canvasWidth, canvasHeight, margin);
+                }
+
+                // Draw the full path first (as a faint guide)
+                ctx.beginPath();
+                ctx.moveTo(margin, canvasHeight - margin);
+                for (let t = 0; t <= t_flight; t += t_flight / 200) {
+                    const x = velocity * Math.cos(angleRad) * t;
+                    const y = velocity * Math.sin(angleRad) * t - 0.5 * g * t * t;
+                    ctx.lineTo(margin + x * scale, canvasHeight - margin - y * scale);
+                }
+                ctx.strokeStyle = traceModeCheckbox.checked ? `hsla(${angle*3}, 70%, 50%, 0.7)` : '#a5b4fc';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Calculate current position for the moving ball
+                const t = Math.min(elapsedTime, t_flight);
+                const currentX = velocity * Math.cos(angleRad) * t;
+                const currentY = velocity * Math.sin(angleRad) * t - 0.5 * g * t * t;
+                
+                // Draw the projectile ball
+                ctx.beginPath();
+                ctx.arc(
+                    margin + currentX * scale,
+                    canvasHeight - margin - currentY * scale,
+                    6, 0, 2 * Math.PI
+                );
+                ctx.fillStyle = traceModeCheckbox.checked ? `hsla(${angle*3}, 80%, 40%, 1)` : '#4f46e5';
+                ctx.fill();
+
+                // Continue animation if not finished
+                if (elapsedTime < t_flight) {
+                    animationId = requestAnimationFrame(animate);
+                }
+            }
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // --- Event Listeners ---
+        function updateAngleDisplay() {
+            angleValue.textContent = `${angleSlider.value}°`;
+        }
+
+        function updateVelocityDisplay() {
+            velocityValue.textContent = `${velocitySlider.value} m/s`;
+        }
+
+        function resetSimulation() {
+             if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            angleSlider.value = 45;
+            velocitySlider.value = 25;
+            traceModeCheckbox.checked = false;
+            updateAngleDisplay();
+            updateVelocityDisplay();
+            rangeResult.textContent = '- m';
+            heightResult.textContent = '- m';
+            timeResult.textContent = '- s';
+            drawInitialState();
+        }
+
+        angleSlider.addEventListener('input', updateAngleDisplay);
+        velocitySlider.addEventListener('input', updateVelocityDisplay);
+        simulateBtn.addEventListener('click', startSimulation);
+        resetBtn.addEventListener('click', resetSimulation);
+        window.addEventListener('resize', setupCanvas);
+
+        // --- Initial Call ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setupCanvas();
+            updateAngleDisplay();
+            updateVelocityDisplay();
+        });
+
+    </script>
+</body>
+</html>

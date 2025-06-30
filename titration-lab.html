@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จำลองการทดลองเคมีขั้นสูง - Smart Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+        #beakerLiquid { transition: background-color 0.4s ease; }
+        .form-select, .form-input {
+            border-color: #d1d5db;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .form-select:focus, .form-input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.5);
+            outline: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-indigo-600">Smart Lab & Management</a>
+            <!-- Back Tab -->
+            <a href="simulator.html" class="text-indigo-600 hover:text-indigo-800 font-medium transition text-base">&larr; กลับหน้าหลักแล็ป</a>
+            <!-- Auth Tabs -->
+            <!-- ลบ nav ออก -->
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-10">
+        <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">จำลองการไทเทรตกรด-เบสขั้นสูง</h1>
+            <p class="text-gray-600 mb-8">เลือกสารเคมี, กำหนดค่า, และสังเกตผลผ่านกราฟไทเทรตโค้งเพื่อความเข้าใจที่ลึกซึ้งยิ่งขึ้น</p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- === Setup and Controls Column === -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">1. ตั้งค่าการทดลอง</h3>
+                        <!-- Analyte (in beaker) -->
+                        <div class="mb-4">
+                            <label for="analyte" class="block text-sm font-medium text-gray-700">สารในบีกเกอร์ (Analyte)</label>
+                            <select id="analyte" class="mt-1 block w-full py-2 px-3 border rounded-md shadow-sm form-select">
+                                <option value="HCl">กรดไฮโดรคลอริก (HCl)</option>
+                                <option value="CH3COOH">กรดแอซิติก (CH₃COOH)</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <div>
+                                <label for="analyteMolarity" class="block text-xs text-gray-600">ความเข้มข้น (M)</label>
+                                <input type="number" id="analyteMolarity" value="0.1" step="0.01" class="mt-1 w-full p-2 border rounded-md form-input">
+                            </div>
+                            <div>
+                                <label for="analyteVolume" class="block text-xs text-gray-600">ปริมาตร (mL)</label>
+                                <input type="number" id="analyteVolume" value="25" step="1" class="mt-1 w-full p-2 border rounded-md form-input">
+                            </div>
+                        </div>
+                        <!-- Titrant (in burette) -->
+                        <div class="mb-4">
+                            <label for="titrant" class="block text-sm font-medium text-gray-700">สารในบิวเรตต์ (Titrant)</label>
+                            <select id="titrant" class="mt-1 block w-full py-2 px-3 border rounded-md shadow-sm form-select">
+                                <option value="NaOH">โซเดียมไฮดรอกไซด์ (NaOH)</option>
+                                <option value="NH3">แอมโมเนีย (NH₃)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="titrantMolarity" class="block text-xs text-gray-600">ความเข้มข้น (M)</label>
+                            <input type="number" id="titrantMolarity" value="0.1" step="0.01" class="mt-1 w-full p-2 border rounded-md form-input">
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4">2. ควบคุมการทดลอง</h3>
+                        <div>
+                            <label for="titrantVolumeSlider" class="block text-sm font-medium text-gray-700">ปริมาตร Titrant ที่เติม (mL)</label>
+                            <div class="flex items-center space-x-3 mt-2">
+                                <input type="range" id="titrantVolumeSlider" min="0" max="50" value="0" step="0.1" class="w-full">
+                                <span id="titrantVolumeValue" class="text-indigo-600 font-bold text-lg w-24 text-center p-2 bg-indigo-50 rounded-md">0.0 mL</span>
+                            </div>
+                        </div>
+                        <button id="resetButton" class="w-full mt-4 bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition">
+                            รีเซ็ตการทดลอง
+                        </button>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg border text-center">
+                        <h3 class="text-xl font-bold text-indigo-700">ค่า pH ปัจจุบัน</h3>
+                        <p id="phResult" class="text-5xl font-bold text-blue-600 my-2">1.00</p>
+                        <p id="statusResult" class="font-medium text-blue-600">สารละลายเป็นกรด</p>
+                    </div>
+                </div>
+                <!-- === Visualization Column === -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Lab Visual -->
+                    <div class="relative w-full h-64 flex justify-center items-end bg-gray-100 rounded-lg p-4">
+                        <!-- Burette -->
+                        <div class="absolute top-0 w-8 h-56 bg-gray-200 border-2 border-gray-300 rounded-b-lg" style="clip-path: polygon(0 0, 100% 0, 100% 95%, 50% 100%, 0 95%);">
+                            <div class="absolute top-2 left-0 right-0 text-center text-xs text-gray-600" id="buretteLabel">NaOH</div>
+                        </div>
+                        <!-- Beaker -->
+                        <div class="w-32 h-48 bg-gray-200 border-b-4 border-gray-400 relative" style="clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%);">
+                            <div id="beakerLiquid" class="absolute bottom-0 w-full h-3/4 bg-blue-200 bg-opacity-50"></div>
+                            <div class="absolute bottom-2 left-0 right-0 text-center text-xs text-gray-600" id="beakerLabel">HCl</div>
+                        </div>
+                    </div>
+                    <!-- Graph -->
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        <h3 class="text-xl font-bold text-indigo-700 mb-2">กราฟไทเทรตโค้ง</h3>
+                        <canvas id="titrationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-white mt-12">
+        <div class="container mx-auto px-6 py-4 text-center text-gray-500">
+            <p>&copy; 2025 Smart Lab &amp; Management. All Rights Reserved.</p>
+        </div>
+    </footer>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script>
+        // Firebase config (ใช้ config ของโปรเจกต์คุณ)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCccYvtT_EX5wRLmQHb1DpcUgzT7jnUQu4",
+            authDomain: "smart-lab-8252d.firebaseapp.com",
+            projectId: "smart-lab-8252d",
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Show user email if logged in
+        firebase.auth().onAuthStateChanged(function(user) {
+            const emailSpan = document.getElementById('user-email');
+            const loginLink = document.getElementById('login-link');
+            const logoutLink = document.getElementById('logout-link');
+            if (user && user.email) {
+                emailSpan.textContent = user.email;
+                loginLink.style.display = 'none';
+                logoutLink.style.display = '';
+            } else {
+                emailSpan.textContent = '';
+                loginLink.style.display = '';
+                logoutLink.style.display = 'none';
+            }
+        });
+
+        // Logout handler
+        document.getElementById('logout-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            firebase.auth().signOut().then(function() {
+                window.location.href = "login.html";
+            });
+        });
+    </script>
+    <script>
+        // --- Chemical Data ---
+        const chemicals = {
+            'HCl': { name: 'กรดไฮโดรคลอริก', type: 'strong_acid' },
+            'CH3COOH': { name: 'กรดแอซิติก', type: 'weak_acid', Ka: 1.8e-5 },
+            'NaOH': { name: 'โซเดียมไฮดรอกไซด์', type: 'strong_base' },
+            'NH3': { name: 'แอมโมเนีย', type: 'weak_base', Kb: 1.8e-5 }
+        };
+
+        // --- DOM Elements ---
+        const elements = {
+            analyteSelect: document.getElementById('analyte'),
+            analyteMolarityInput: document.getElementById('analyteMolarity'),
+            analyteVolumeInput: document.getElementById('analyteVolume'),
+            titrantSelect: document.getElementById('titrant'),
+            titrantMolarityInput: document.getElementById('titrantMolarity'),
+            slider: document.getElementById('titrantVolumeSlider'),
+            volumeDisplay: document.getElementById('titrantVolumeValue'),
+            phDisplay: document.getElementById('phResult'),
+            statusDisplay: document.getElementById('statusResult'),
+            beakerLiquid: document.getElementById('beakerLiquid'),
+            beakerLabel: document.getElementById('beakerLabel'),
+            buretteLabel: document.getElementById('buretteLabel'),
+            resetButton: document.getElementById('resetButton'),
+            chartCanvas: document.getElementById('titrationChart')
+        };
+
+        let titrationChart;
+        let fullTitrationData = [];
+
+        // --- pH Calculation Logic ---
+        function calculatePH(analyte, titrant, Va, Ma, Vt, Mt) {
+            const Ka = analyte.Ka || 0;
+            const Kb = titrant.Kb || 0;
+            const Kw = 1.0e-14;
+            const initialMolesA = Ma * (Va / 1000);
+            const addedMolesT = Mt * (Vt / 1000);
+            const totalVolume = (Va + Vt) / 1000;
+
+            // Strong Acid - Strong Base
+            if (analyte.type === 'strong_acid' && titrant.type === 'strong_base') {
+                if (addedMolesT < initialMolesA) { // Excess acid
+                    const H = (initialMolesA - addedMolesT) / totalVolume;
+                    return -Math.log10(H);
+                } else if (addedMolesT === initialMolesA) { // Equivalence point
+                    return 7.0;
+                } else { // Excess base
+                    const OH = (addedMolesT - initialMolesA) / totalVolume;
+                    return 14 + Math.log10(OH);
+                }
+            }
+
+            // Weak Acid - Strong Base
+            if (analyte.type === 'weak_acid' && titrant.type === 'strong_base') {
+                if (Vt === 0) { // Initial state
+                    const H = Math.sqrt(Ka * Ma);
+                    return -Math.log10(H);
+                } else if (addedMolesT < initialMolesA) { // Buffer region
+                    const molesA = initialMolesA - addedMolesT;
+                    const molesCB = addedMolesT;
+                    // Henderson-Hasselbalch
+                    return Math.log10(molesCB / molesA) + Math.log10(1/Ka);
+                } else if (addedMolesT === initialMolesA) { // Equivalence point
+                    const concCB = initialMolesA / totalVolume;
+                    const Kb_CB = Kw / Ka;
+                    const OH = Math.sqrt(Kb_CB * concCB);
+                    return 14 + Math.log10(OH);
+                } else { // Excess base
+                    const OH = (addedMolesT - initialMolesA) / totalVolume;
+                    return 14 + Math.log10(OH);
+                }
+            }
+
+            // Fallback for unsupported combinations (e.g., weak-weak)
+            return NaN;
+        }
+
+        // --- Simulation Update Function ---
+        function updateSimulation() {
+            const V_base_added_mL = parseFloat(elements.slider.value);
+            elements.volumeDisplay.textContent = `${V_base_added_mL.toFixed(1)} mL`;
+
+            const analyte = chemicals[elements.analyteSelect.value];
+            const titrant = chemicals[elements.titrantSelect.value];
+            const Va = parseFloat(elements.analyteVolumeInput.value);
+            const Ma = parseFloat(elements.analyteMolarityInput.value);
+            const Mt = parseFloat(elements.titrantMolarityInput.value);
+
+            const pH = calculatePH(analyte, titrant, Va, Ma, V_base_added_mL, Mt);
+
+            elements.phDisplay.textContent = isNaN(pH) ? 'N/A' : pH.toFixed(2);
+
+            let statusText = 'Error';
+            let colorClass = 'text-gray-500';
+            let beakerColor = 'rgba(156, 163, 175, 0.4)'; // gray
+
+            if (!isNaN(pH)) {
+                if (pH < 6.8) {
+                    statusText = 'สารละลายเป็นกรด';
+                    colorClass = 'text-blue-600';
+                    beakerColor = 'rgba(59, 130, 246, 0.2)';
+                } else if (pH > 7.2) {
+                    statusText = 'สารละลายเป็นเบส';
+                    colorClass = 'text-pink-600';
+                    if (pH > 8.2) beakerColor = 'rgba(236, 72, 153, 0.4)';
+                } else {
+                    statusText = 'ใกล้จุดสมมูล';
+                    colorClass = 'text-green-600';
+                    beakerColor = 'rgba(22, 163, 74, 0.3)';
+                }
+            }
+
+            elements.statusDisplay.textContent = statusText;
+            elements.phDisplay.className = `text-5xl font-bold my-2 ${colorClass}`;
+            elements.statusDisplay.className = `font-medium ${colorClass}`;
+            elements.beakerLiquid.style.backgroundColor = beakerColor;
+
+            updateChartHighlight(V_base_added_mL);
+        }
+
+        function setupAndRunFullTitration() {
+            const analyte = chemicals[elements.analyteSelect.value];
+            const titrant = chemicals[elements.titrantSelect.value];
+            const Ma = parseFloat(elements.analyteMolarityInput.value);
+            const Va = parseFloat(elements.analyteVolumeInput.value);
+            const Mt = parseFloat(elements.titrantMolarityInput.value);
+
+            // Update labels
+            elements.beakerLabel.textContent = elements.analyteSelect.value;
+            elements.buretteLabel.textContent = elements.titrantSelect.value;
+
+            fullTitrationData = [];
+            for (let vt = 0; vt <= 50; vt += 0.1) {
+                const pH = calculatePH(analyte, titrant, Va, Ma, vt, Mt);
+                if (!isNaN(pH)) {
+                    fullTitrationData.push({ x: vt, y: pH });
+                }
+            }
+
+            renderChart();
+            updateSimulation();
+        }
+
+        // --- Chart Functions ---
+        function renderChart() {
+            if (titrationChart) {
+                titrationChart.destroy();
+            }
+            const ctx = elements.chartCanvas.getContext('2d');
+            titrationChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Titration Curve',
+                        data: fullTitrationData,
+                        borderColor: '#4f46e5',
+                        backgroundColor: '#4f46e5',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.1
+                    }, {
+                        label: 'Current Point',
+                        data: [],
+                        borderColor: '#db2777',
+                        backgroundColor: '#db2777',
+                        pointRadius: 5,
+                        pointStyle: 'circle',
+                        showLine: false
+                    }]
+                },
+                options: {
+                    animation: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: `Volume of ${elements.titrantSelect.value} added (mL)` }
+                        },
+                        y: {
+                            title: { display: true, text: 'pH' },
+                            min: 0, max: 14
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function updateChartHighlight(volume) {
+            if (titrationChart) {
+                const currentPoint = fullTitrationData.find(p => p.x >= volume) || fullTitrationData[fullTitrationData.length - 1];
+                titrationChart.data.datasets[1].data = [currentPoint];
+                titrationChart.update('none');
+            }
+        }
+
+        // --- Reset Function ---
+        function reset() {
+            elements.analyteSelect.value = 'HCl';
+            elements.analyteMolarityInput.value = '0.1';
+            elements.analyteVolumeInput.value = '25';
+            elements.titrantSelect.value = 'NaOH';
+            elements.titrantMolarityInput.value = '0.1';
+            elements.slider.value = '0';
+            setupAndRunFullTitration();
+        }
+
+        // --- Event Listeners ---
+        [elements.analyteSelect, elements.titrantSelect, elements.analyteMolarityInput, elements.analyteVolumeInput, elements.titrantMolarityInput].forEach(el => {
+            el.addEventListener('change', setupAndRunFullTitration);
+        });
+        elements.slider.addEventListener('input', updateSimulation);
+        elements.resetButton.addEventListener('click', reset);
+
+        // --- Initial Run ---
+        document.addEventListener('DOMContentLoaded', setupAndRunFullTitration);
+    </script>
+</body>
+</html>
