@@ -22,6 +22,7 @@
     <!-- Firebase Auth CDN -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
@@ -120,8 +121,13 @@
         };
         firebase.initializeApp(firebaseConfig);
 
-        // Show user email if logged in and show/hide cards by role
+        // ตรวจสอบการล็อกอิน ถ้าไม่ได้ล็อกอิน redirect ไป login.html
         firebase.auth().onAuthStateChanged(async function(user) {
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
+
             const emailSpan = document.getElementById('user-email');
             const loginLink = document.getElementById('login-link');
             const logoutLink = document.getElementById('logout-link');
@@ -138,48 +144,36 @@
                 cardAdmin.style.display = 'none';
             }
 
-            if (user && user.email) {
-                emailSpan.textContent = user.email;
-                loginLink.style.display = 'none';
-                logoutLink.style.display = '';
+            emailSpan.textContent = user.email;
+            loginLink.style.display = 'none';
+            logoutLink.style.display = '';
 
-                // ดึง role จาก Firebase Database
-                try {
-                    const db = firebase.database();
-                    const snapshot = await db.ref('users/' + user.uid).once('value');
-                    const userData = snapshot.val();
-                    const role = userData && userData.role ? userData.role : 'student';
+            // ดึง role จาก Firebase Database
+            try {
+                const db = firebase.database();
+                const snapshot = await db.ref('users/' + user.uid).once('value');
+                const userData = snapshot.val();
+                const role = userData && userData.role ? userData.role : 'student';
 
-                    if (role === 'teacher') {
-                        // แสดงเฉพาะ card admin dashboard และจัดให้อยู่ตรงกลาง
-                        hideAllCards();
-                        cardAdmin.style.display = '';
-                        cardList.className = "flex justify-center";
-                        // ถ้าไม่ได้อยู่หน้า admin-dashboard.html ให้ redirect ไป
-                        if (!window.location.pathname.endsWith("admin-dashboard.html")) {
-                            window.location.href = "admin-dashboard.html";
-                        }
-                    } else {
-                        // แสดงทุก card ยกเว้น admin dashboard และจัดให้อยู่ตรงกลาง
-                        cardBooking.style.display = '';
-                        cardSimulator.style.display = '';
-                        cardAI.style.display = '';
-                        cardAdmin.style.display = 'none';
-                        cardList.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8";
+                if (role === 'teacher') {
+                    // แสดงเฉพาะ card admin dashboard และจัดให้อยู่ตรงกลาง
+                    hideAllCards();
+                    cardAdmin.style.display = '';
+                    cardList.className = "flex justify-center";
+                    // ถ้าไม่ได้อยู่หน้า admin-dashboard.html ให้ redirect ไป
+                    if (!window.location.pathname.endsWith("admin-dashboard.html")) {
+                        window.location.href = "admin-dashboard.html";
                     }
-                } catch (e) {
-                    // ถ้า error ให้แสดงทุก card ยกเว้น admin dashboard
+                } else {
+                    // แสดงทุก card ยกเว้น admin dashboard และจัดให้อยู่ตรงกลาง
                     cardBooking.style.display = '';
                     cardSimulator.style.display = '';
                     cardAI.style.display = '';
                     cardAdmin.style.display = 'none';
                     cardList.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8";
                 }
-            } else {
-                emailSpan.textContent = '';
-                loginLink.style.display = '';
-                logoutLink.style.display = 'none';
-                // ผู้ไม่ได้ login เห็นทุก card ยกเว้น admin dashboard
+            } catch (e) {
+                // ถ้า error ให้แสดงทุก card ยกเว้น admin dashboard
                 cardBooking.style.display = '';
                 cardSimulator.style.display = '';
                 cardAI.style.display = '';
